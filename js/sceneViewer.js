@@ -26,6 +26,35 @@ var ViewerScene = function() {
 
 	window.vrActive = this.vrActive;
 
+	var _speed = new THREE.Vector3(0,0,0);
+    var _acceleration_multiply = 0.1;
+
+    var onDeviceMotion = function(event) {
+    	//console.log('motion detected: ', event.acceleration);
+        var ax = Math.round(event.acceleration.y);
+        var ay = Math.round(event.acceleration.z);
+        //var backgroundPlane.position.y = ax;
+        //backgroundPlane.position.x = ay;
+        _speed.x = _acceleration_multiply*ax;
+        _speed.y = _acceleration_multiply*ay;
+
+        //var position = this.camera.position.clone();
+        var target = new THREE.Vector3(_speed.x*Math.cos(this.camera.rotation.y), 0, _speed.y*Math.sin(this.camera.rotation.y));
+        console.log('rotation : ', this.camera.rotation.y);
+        this.camera.position.x += target.x// * -this.camera.rotation.x;
+        this.camera.position.z += target.z// * -this.camera.rotation.z;
+
+        //console.log('SPEEEED: ', this.camera.position);
+
+        // var tween = new TWEEN.Tween(position).to(target, 2000);
+        //             tween.onUpdate(function(){
+        //                 zepPlane.position.x = position.x;
+        //                 zepPlane.position.y = position.y;
+        //             });
+        //             zepPlane.position.y = 200 + (ax * -1);
+        //             zepPlane.position.x = 500 + (ay * -1);
+    }.bind(this);
+
 	this.initialise = function(container)
 	{
 		this.container = container;
@@ -46,13 +75,16 @@ var ViewerScene = function() {
         //this.camera.up = new THREE.Vector3(0,0,1);
         //this.camera.lookAt(new THREE.Vector3(0,0,10));
         if (this.isMobile)
+        {
         	this.controls = new THREE.DeviceOrientationControls( this.camera );
+        	//this.addDeviceMotionEvents();
+        }
         else {
         	this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         	this.controls.enablePan = true;
             this.controls.enableRotate = true;
             this.controls.enableZoom = true;
-            this.controls.target = new THREE.Vector3(0, 1, 1);
+            this.controls.target = new THREE.Vector3(0, 1, 1);            
         }
 
         this.light = new THREE.AmbientLight( 0xFFFFFF, 1.8);
@@ -175,7 +207,7 @@ var ViewerScene = function() {
 				this.renderer.render(this.scene, this.camera);	
 			} 
 
-			console.log('animating...',this.scene.children.length);
+			//console.log('animating...',this.scene.children.length);
 			this.frameId = window.requestAnimationFrame(this.animate.bind(this));
 			
 		}
@@ -186,16 +218,25 @@ var ViewerScene = function() {
 		return mainScope.vrActive;
 	}
 
+	this.addDeviceMotionEvents = function() {
+        //console.log('added motion events');
+        if (window.DeviceMotionEvent) {
+		  console.log("DeviceMotionEvent supported");
+		} 
+
+        window.addEventListener('devicemotion', onDeviceMotion, false);
+    }
+
 	this.loadNewMesh = function(meshlink, meshname) 
 	{
 		var newMesh = new THREE.Object3D();
 		var loader = new THREE.JSONLoader();
         loader.load(meshlink, function (geometry, materials){
             var mat = new THREE.MeshFaceMaterial(materials);
-            console.log('material: ', mat);
+            //console.log('material: ', mat);
             for (var i=0;i<mat.materials.length;i++)
             {
-            	console.log('new color: #', mat.materials[i])
+            	//console.log('new color: #', mat.materials[i])
             	var tex = mat.materials[i].map;
             	var newCol = '#'+mat.materials[i].color.getHexString();
             	//newCol = shadeColor2(newCol, 0.5);
