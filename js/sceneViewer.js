@@ -115,7 +115,8 @@ var ViewerScene = function() {
 	};
 
 	this.loadTextures = function() {
-		this.materialLeft = new THREE.MeshStandardMaterial({
+		//this.materialLeft = new THREE.MeshStandardMaterial({
+		this.materialLeft = new THREE.MeshBasicMaterial({
                 //color:color_negru,
                 color:"#FFFFFF",
                 roughness : 0.2,
@@ -123,7 +124,8 @@ var ViewerScene = function() {
                 //envMap: simItalia.cubeCamera.renderTarget.texture
             });
 
-		this.materialRight = new THREE.MeshStandardMaterial({
+		//this.materialRight = new THREE.MeshStandardMaterial({
+		this.materialRight = new THREE.MeshBasicMaterial({
                 //color:color_negru,
                 color:"#FFFFFF",
                 roughness : 0.2,
